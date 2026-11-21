@@ -15,7 +15,8 @@ urlpatterns = [
     
     # 你的业务接口
     path('api/learning/', include('learning.urls')),
-    
+    path('api/users/', include('users.urls')), # <-- 新增这一行
+
     # API 文档生成 (只有开发时可以访问)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
