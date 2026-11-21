@@ -11,9 +11,12 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv  # 导入加载工具
+from os import getenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR.parent / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,12 +40,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users'
+    # 第三方
+    "rest_framework",
+    "corsheaders",
+    "drf_spectacular",
+    # 本地应用
+    'users',
+    'learning'
 ]
 # 使用user模型
 AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,6 +61,18 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": getenv("DB_NAME", "shizhou_db"),
+        "USER": getenv("DB_USER", "shizhou_nyy"),
+        "PASSWORD": getenv("DB_PASSWORD"),  # 这里从环境变量读
+        "HOST": getenv("DB_HOST", "localhost"),
+        "PORT": getenv("DB_PORT", "5432"),
+    }
+}
+
 
 ROOT_URLCONF = 'config.urls'
 
@@ -123,3 +145,28 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# --- REST Framework 配置 ---
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",  # 默认要求登录后才能访问
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# --- JWT 配置 ---
+from datetime import timedelta
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),   # Access Token 有效期 1 天
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Refresh Token 有效期 7 天
+}
+
+# --- CORS 配置 ---
+# 允许你的 React 前端（Vite 默认 5173 端口）跨域访问
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
