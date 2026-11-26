@@ -14,8 +14,122 @@
   }
 }
 
+/* ===== 悬停反馈 =====
+   与登录页动效同一套语言：短时、无回弹、只做「指针落在这里」的确认，
+   不改信息层级。统一 140ms（即时反馈）/ 200ms（位移与描线）+ cubic-bezier(0.2, 0.7, 0.3, 1)。 */
+
+/* 卡片 / 区块：抬 2px + 边框提亮 + 极淡投影 */
+.hover-lift {
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  border-color: #93c5fd; /* blue-300 */
+  box-shadow: 0 8px 18px -10px rgba(15, 23, 42, 0.4);
+}
+
+/* 行内链接 / 文字按钮：下划线自左向右描出（替代瞬间出现的 hover:underline） */
+.hover-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  padding-bottom: 1px;
+  transition:
+    background-size 200ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    color 140ms ease;
+}
+
+.hover-underline:hover,
+.hover-underline:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* 实心按钮：抬 1px + 一点投影；按下立刻归位，不留惯性 */
+.hover-btn {
+  transition:
+    transform 140ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    box-shadow 140ms ease,
+    background-color 140ms ease;
+}
+
+.hover-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px -8px rgba(37, 99, 235, 0.65);
+}
+
+.hover-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+  transition-duration: 60ms;
+}
+
+/* 导航项：currentColor 下划线，激活态常驻（NavLink 自带 aria-current="page"） */
+.hover-nav {
+  position: relative;
+}
+
+.hover-nav::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.hover-nav:hover::after,
+.hover-nav:focus-visible::after,
+.hover-nav[aria-current='page']::after {
+  transform: scaleX(1);
+}
+
+/* 品牌标题：只动自己，不牵动旁边导航（不做字距变化，避免重排） */
+.hover-brand {
+  display: inline-block;
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    color 140ms ease;
+}
+
+.hover-brand:hover {
+  transform: translateY(-1px);
+  color: #1d4ed8; /* blue-700 */
+}
+
+/* 降级：系统开了「减少动态效果」时全部退化为静态，不做位移也不做描线过渡 */
 @media (prefers-reduced-motion: reduce) {
   .page-enter {
     animation: none;
+  }
+
+  .hover-lift,
+  .hover-underline,
+  .hover-btn,
+  .hover-nav::after,
+  .hover-brand {
+    transition: none;
+  }
+
+  .hover-lift:hover,
+  .hover-btn:hover:not(:disabled),
+  .hover-brand:hover {
+    transform: none;
+  }
+
+  .hover-underline:hover,
+  .hover-underline:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    background-size: 0% 1px;
   }
 }

@@ -1,0 +1,294 @@
+/* ============================================================
+   全局环境背景
+   设计意图：把界面放进一间"观测室"——
+   纸面是刻度盘，空气里有缓慢游走的光，远处有一张自己在接线的认知网络，
+   右下角一台雷达在扫。所有层都在 5% ~ 20% 的浓度里，读正文时它们不存在，
+   抬头看时它们一直在动。
+
+   层序（从下到上）：
+   1 点阵          22px，26s 漂一格
+   2 蓝图刻度      88px 细线，96s 反向漂一格
+   3/4 双色光团    44s / 58s 缓慢游走，蓝光另有 17s 呼吸
+   5 认知拓扑      canvas，节点漂移 / 就近连线 / 信号沿边跑
+   6 雷达罗盘      刻度环 140s、扫描臂 24s、内环 90s
+   7 暗角          静态压边
+
+   约束：全部 pointer-events:none；只动 transform / opacity / canvas 像素；
+        html[data-motion="off"] 或（无 data-motion 且系统要求减少动效）时，
+        只留静态层。
+   ============================================================ */
+
+.app-bg {
+  --bg-ink: 15, 23, 42; /* 墨色：内页偏冷 */
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translate3d(calc(var(--bg-px, 0) * 10px), calc(var(--bg-py, 0) * 10px), 0);
+  transition: transform 900ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  will-change: transform;
+}
+
+/* —— 1. 点阵 —— */
+.app-bg__dots {
+  position: absolute;
+  inset: -24px;
+  background-image: radial-gradient(rgba(var(--bg-ink), 0.1) 1px, transparent 1px);
+  background-size: 22px 22px;
+  animation: bg-dots-drift 26s linear infinite;
+}
+
+@keyframes bg-dots-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(22px, 22px, 0);
+  }
+}
+
+/* —— 2. 蓝图刻度 —— */
+.app-bg__blueprint {
+  position: absolute;
+  inset: -96px;
+  background-image:
+    linear-gradient(to right, rgba(var(--bg-ink), 0.075) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--bg-ink), 0.075) 1px, transparent 1px);
+  background-size: 88px 88px;
+  opacity: 0.8;
+  animation: bg-blueprint-drift 96s linear infinite;
+}
+
+@keyframes bg-blueprint-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-88px, 88px, 0);
+  }
+}
+
+/* —— 3/4. 双色光团 —— */
+.app-bg__glow {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.app-bg__glow--blue {
+  width: 74vmax;
+  height: 74vmax;
+  left: -14vmax;
+  top: -24vmax;
+  background: radial-gradient(
+    circle at center,
+    rgba(37, 99, 235, 0.18),
+    rgba(37, 99, 235, 0.055) 46%,
+    transparent 68%
+  );
+  animation:
+    bg-wander-a 44s ease-in-out infinite,
+    bg-breathe 17s ease-in-out infinite alternate;
+}
+
+.app-bg__glow--green {
+  width: 62vmax;
+  height: 62vmax;
+  right: -16vmax;
+  bottom: -22vmax;
+  background: radial-gradient(
+    circle at center,
+    rgba(141, 198, 63, 0.2),
+    rgba(141, 198, 63, 0.055) 46%,
+    transparent 68%
+  );
+  animation: bg-wander-b 58s ease-in-out infinite;
+}
+
+@keyframes bg-wander-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(6vmax, 4vmax, 0);
+  }
+}
+
+@keyframes bg-wander-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-5vmax, -6vmax, 0);
+  }
+}
+
+@keyframes bg-breathe {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* —— 5. 认知拓扑（canvas，逻辑在 CognitionField.tsx） —— */
+.app-bg__field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* —— 6. 雷达罗盘：右下角一台一直在扫的仪器 —— */
+.app-bg__orbit,
+.app-bg__orbit-arm,
+.app-bg__orbit-core {
+  position: absolute;
+  right: -110px;
+  bottom: -110px;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+}
+
+/* 外圈刻度：每分钟刻度 + 每 30° 长刻度 */
+.app-bg__orbit {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(var(--bg-ink), 0.13) 0deg 0.5deg,
+    transparent 0.5deg 6deg
+  );
+  mask: radial-gradient(circle at center, transparent 0 57%, #000 57% 63.5%, transparent 63.5%);
+  animation: bg-orbit-spin 140s linear infinite;
+}
+
+/* 扫描臂：24s 一圈，前缘一道淡光 */
+.app-bg__orbit-arm {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 300deg,
+    rgba(37, 99, 235, 0.02) 320deg,
+    rgba(37, 99, 235, 0.13) 356deg,
+    rgba(141, 198, 63, 0.22) 360deg
+  );
+  mask: radial-gradient(circle at center, transparent 0 8%, #000 26%, #000 62%, transparent 63%);
+  animation: bg-orbit-spin 24s linear infinite reverse;
+}
+
+/* 内环：细实线 + 十字准星，缓慢反向转 */
+.app-bg__orbit-core {
+  width: 250px;
+  height: 250px;
+  right: -45px;
+  bottom: -45px;
+  border: 1px solid rgba(var(--bg-ink), 0.09);
+  background:
+    linear-gradient(to right, transparent calc(50% - 0.5px), rgba(var(--bg-ink), 0.12) calc(50% - 0.5px), rgba(var(--bg-ink), 0.12) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(var(--bg-ink), 0.12) calc(50% - 0.5px), rgba(var(--bg-ink), 0.12) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+  animation: bg-orbit-spin 90s linear infinite;
+}
+
+@keyframes bg-orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* —— 7. 暗角 —— */
+.app-bg__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 92% at 50% 38%, transparent 58%, rgba(var(--bg-ink), 0.07) 100%);
+}
+
+/* ============================================================
+   变体：登录页（纸面配色）
+   墨色换成纸面上的灰绿，光团改成墨绿 + 信号绿；
+   登录页自带 rhine__scan，这里不再叠第二条扫描带。
+   ============================================================ */
+.app-bg--paper {
+  --bg-ink: 16, 21, 15;
+}
+
+.app-bg--paper .app-bg__dots {
+  background-image: radial-gradient(rgba(var(--bg-ink), 0.12) 1px, transparent 1px);
+}
+
+.app-bg--paper .app-bg__glow--blue {
+  background: radial-gradient(
+    circle at center,
+    rgba(15, 42, 38, 0.16),
+    rgba(15, 42, 38, 0.05) 46%,
+    transparent 68%
+  );
+}
+
+.app-bg--paper .app-bg__glow--green {
+  background: radial-gradient(
+    circle at center,
+    rgba(141, 198, 63, 0.22),
+    rgba(141, 198, 63, 0.06) 46%,
+    transparent 68%
+  );
+}
+
+.app-bg--paper .app-bg__orbit-arm {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 310deg,
+    rgba(93, 138, 31, 0.03) 330deg,
+    rgba(93, 138, 31, 0.14) 357deg,
+    rgba(141, 198, 63, 0.24) 360deg
+  );
+}
+
+/* ============================================================
+   降级：静态一张图——点阵 + 刻度 + 拓扑首帧 + 罗盘 + 暗角
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='full']) .app-bg {
+    transition: none;
+    transform: none;
+  }
+
+  html:not([data-motion='full']) .app-bg__blueprint,
+  html:not([data-motion='full']) .app-bg__glow,
+  html:not([data-motion='full']) .app-bg__orbit,
+  html:not([data-motion='full']) .app-bg__orbit-arm,
+  html:not([data-motion='full']) .app-bg__orbit-core {
+    animation: none;
+  }
+
+  html:not([data-motion='full']) .app-bg__glow {
+    opacity: 0.85;
+  }
+
+  html:not([data-motion='full']) .app-bg__orbit-arm {
+    opacity: 0;
+  }
+}
+
+/* ============================================================
+   卡片：一层薄玻璃
+   内页的卡片原来是纯白，背景再好看也全被挡住；这里留 18% 的通透，
+   让点阵/拓扑在纸面下若隐若现——这也是"背景在不在"最直观的证据。
+   只作用于 main 里的卡片，顶栏与登录卡片保持原来的实底。
+   ============================================================ */
+.app-shell main .card,
+.app-shell main .bg-white {
+  background-color: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  transition: background-color 200ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.app-shell main .card:hover,
+.app-shell main .bg-white:hover {
+  background-color: rgba(255, 255, 255, 0.92);
+}

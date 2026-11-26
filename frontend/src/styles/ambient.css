@@ -1,0 +1,95 @@
+/* ============================================================
+   全局环境动效（app shell）：标记、加载态
+   目的：让静止的界面"活着"，但不抢注意力。
+   原则——周期长（16s~26s）、振幅极小、循环无缝、绝不夹带内容动画。
+   背景分层见 styles/background.css；这里只管顶栏标记与加载态。
+   ============================================================ */
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+/* 内容永远在环境层之上 */
+.app-shell > header,
+.app-shell > main {
+  position: relative;
+  z-index: 1;
+}
+
+/* —— 顶栏标记：虚线环 22s 一圈、中心点 5s 一次呼吸 —— */
+.app-shell__mark {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: #2563eb;
+  opacity: 0.85;
+}
+
+.app-shell__mark .rhine__mark-rot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ambient-mark-spin 22s linear infinite;
+}
+
+@keyframes ambient-mark-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.app-shell__mark .rhine__mark-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ambient-mark-pulse 5s ease-in-out infinite;
+}
+
+@keyframes ambient-mark-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.82);
+    opacity: 0.75;
+  }
+}
+
+/* 若登录页的 CSS 先被加载过，它的入场描边动画不该在这里重放 */
+.app-shell__mark .rhine__mark-draw {
+  animation: none;
+  stroke-dasharray: none;
+}
+
+/* —— 加载态文字：9s 一次极轻的明暗呼吸，表示"还在跑" —— */
+.ambient-wait {
+  animation: ambient-wait 6s ease-in-out infinite;
+}
+
+@keyframes ambient-wait {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 降级：系统开了「减少动态效果」时（Windows 关掉「动画效果」、macOS 勾上「减弱动态运动」），
+   只保留虚线环 22s 一圈（最慢的底噪）；中心点呼吸、加载态呼吸一律关掉。 */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='full']) .app-shell__mark .rhine__mark-dot,
+  html:not([data-motion='full']) .ambient-wait {
+    animation: none;
+  }
+
+  html:not([data-motion='full']) .app-shell__mark .rhine__mark-dot {
+    transform: none;
+    opacity: 1;
+  }
+}
