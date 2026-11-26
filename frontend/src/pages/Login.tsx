@@ -84,7 +84,7 @@ export default function Login() {
 
       <main className="rhine__panel">
         <section className="rhine__ident">
-          <RhineMark className="rhine__mark" />
+          <RhineMark className="rhine__mark" animated />
           <div className="rhine__wordmark">
             RHINE
             <br />
@@ -125,16 +125,18 @@ export default function Login() {
                 <span className="rhine__idx">01</span>
                 用户名 / OPERATOR ID
               </label>
-              <input
-                id="username"
-                className="rhine__input"
-                type="text"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                placeholder="输入编号或代号"
-                autoComplete="username"
-                required
-              />
+              <div className="rhine__input-wrap">
+                <input
+                  id="username"
+                  className="rhine__input"
+                  type="text"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  placeholder="输入编号或代号"
+                  autoComplete="username"
+                  required
+                />
+              </div>
             </div>
 
             <div className="rhine__field">
@@ -142,16 +144,18 @@ export default function Login() {
                 <span className="rhine__idx">02</span>
                 密码 / ACCESS KEY
               </label>
-              <input
-                id="password"
-                className="rhine__input"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                required
-              />
+              <div className="rhine__input-wrap">
+                <input
+                  id="password"
+                  className="rhine__input"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
             </div>
 
             {error && (

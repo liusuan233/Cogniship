@@ -1,6 +1,7 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
+import '../styles/motion.css';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'font-semibold text-blue-600' : 'text-gray-600 hover:text-blue-600';
@@ -10,6 +11,7 @@ export default function Layout() {
   const logout = useAuthStore((state) => state.logout);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -44,7 +46,10 @@ export default function Layout() {
       </header>
 
       <main className="mx-auto w-full max-w-4xl px-6 py-6">
-        <Outlet />
+        {/* key 变化才重放动画：换页时淡入，同页内刷新状态不闪 */}
+        <div key={location.pathname} className="page-enter">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
