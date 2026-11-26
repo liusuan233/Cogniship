@@ -1,71 +1,188 @@
-import { useState } from 'react';
-import { useNavigate, Link} from 'react-router-dom';
-import { apiClient } from '../api/client';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { obtainToken } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
-
-
+import { apiErrorMessage } from '../utils/format';
+import RhineMark from '../components/RhineMark';
+import '../styles/rhine-lab.css';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [clock, setClock] = useState(() => new Date());
+  const [sessionId] = useState(() =>
+    Math.random().toString(16).slice(2, 10).toUpperCase().padEnd(8, '0'),
+  );
+
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // 顶栏的实时时钟，纯装饰
+  useEffect(() => {
+    const timer = window.setInterval(() => setClock(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const handleLogin = async (event: FormEvent) => {
+    event.preventDefault();
+
+    const trimmed = username.trim();
+    if (!trimmed || !password) {
+      setError('请输入用户名和密码');
+      return;
+    }
+
     setError('');
+    setSubmitting(true);
     try {
-      // 请求 Django 的 JWT 接口
-      const response = await apiClient.post('/token/', { username, password });
-      login(response.data.access, response.data.refresh);
-      navigate('/'); // 登录成功跳转到首页
-    } catch (err: any) {
-      setError('用户名或密码错误，请重试。');
+      const token = await obtainToken(trimmed, password);
+      login(token.access, token.refresh, trimmed);
+      navigate('/', { replace: true });
+    } catch (err) {
+      // 凭证错误时后端返回英文 detail，这里换成统一的中文提示
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        setError('操作员编号或访问密钥不正确，请重新输入');
+      } else {
+        setError(apiErrorMessage(err, '认证失败，请稍后重试'));
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full p-8 bg-white rounded-xl shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          登录识舟 Cogniship
-        </h2>
-        
-        {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
+  const dateText = clock.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const timeText = clock.toLocaleTimeString('zh-CN', { hour12: false });
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">用户名</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">密码</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            登 录
-          </button>
-        </form>
-        <div className="mt-4 text-center text-sm text-gray-600">
-            还没有账号？ <Link to="/register" className="text-blue-600 hover:underline">去注册</Link>
+  return (
+    <div className="rhine">
+      <div className="rhine__grid" aria-hidden="true" />
+      <div className="rhine__scan" aria-hidden="true" />
+
+      <header className="rhine__topbar">
+        <div className="rhine__topbar-left">
+          <RhineMark className="rhine__topbar-mark" />
+          <span className="rhine__brand-name">RHINE LAB</span>
+          <span className="rhine__sep">/</span>
+          <span className="rhine__muted">莱茵生命 · 认知研究科</span>
         </div>
-      </div>
+        <div className="rhine__topbar-right">
+          <span className="rhine__dot" aria-hidden="true" />
+          <span>SECURE CHANNEL</span>
+          <span className="rhine__muted">
+            {dateText} {timeText}
+          </span>
+        </div>
+      </header>
+
+      <main className="rhine__panel">
+        <section className="rhine__ident">
+          <RhineMark className="rhine__mark" />
+          <div className="rhine__wordmark">
+            RHINE
+            <br />
+            LAB
+          </div>
+          <div className="rhine__sub">
+            COGNITIVE DIVISION
+            <br />
+            认知研究部门 · 识舟计划
+          </div>
+
+          <div className="rhine__readout">
+            <span>REG.</span>
+            <b>RL-0427-C</b>
+            <span>DIV.</span>
+            <b>COGNITION</b>
+            <span>ACCESS</span>
+            <b>LEVEL 03</b>
+            <span>NODE</span>
+            <b>SHIZHOU-01</b>
+          </div>
+
+          <div className="rhine__barcode" aria-hidden="true" />
+        </section>
+
+        <section className="rhine__auth">
+          <div>
+            <div className="rhine__eyebrow">OPERATOR AUTHENTICATION</div>
+            <h1 className="rhine__title">身份验证</h1>
+            <p className="rhine__hint">
+              输入莱茵生命操作员凭证以接入识舟工作台。所有会话均被记录并归档。
+            </p>
+          </div>
+
+          <form className="rhine__form" onSubmit={handleLogin}>
+            <div className="rhine__field">
+              <label className="rhine__label" htmlFor="username">
+                <span className="rhine__idx">01</span>
+                用户名 / OPERATOR ID
+              </label>
+              <input
+                id="username"
+                className="rhine__input"
+                type="text"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="输入编号或代号"
+                autoComplete="username"
+                required
+              />
+            </div>
+
+            <div className="rhine__field">
+              <label className="rhine__label" htmlFor="password">
+                <span className="rhine__idx">02</span>
+                密码 / ACCESS KEY
+              </label>
+              <input
+                id="password"
+                className="rhine__input"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="rhine__alert" role="alert">
+                <span className="rhine__alert-tag">ERROR</span>
+                <span>{error}</span>
+              </div>
+            )}
+
+            <button className="rhine__submit" type="submit" disabled={submitting}>
+              <span>{submitting ? '认证中…' : '认 证'}</span>
+              <span className="rhine__submit-en">AUTHENTICATE</span>
+            </button>
+          </form>
+
+          <div className="rhine__foot">
+            <span className="rhine__muted">尚无操作员编号？</span>
+            <Link to="/register" className="rhine__link">
+              申请权限 →
+            </Link>
+          </div>
+
+          <div className="rhine__sys" aria-hidden="true">
+            <span>SYS.READY</span>
+            <span className="rhine__bar">
+              <i />
+            </span>
+            <span>{sessionId}</span>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

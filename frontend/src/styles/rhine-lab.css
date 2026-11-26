@@ -1,0 +1,490 @@
+/* ============================================================
+   RHINE LAB 风格登录页
+   配色 / 字体 / 网格均按"临床实验室终端"这一套语言走
+   ============================================================ */
+
+.rhine {
+  --rl-paper: #f1f3ee;
+  --rl-white: #fbfcfa;
+  --rl-ink: #10150f;
+  --rl-muted: #6b746a;
+  --rl-line: rgba(16, 21, 15, 0.14);
+  --rl-green: #8dc63f;
+  --rl-green-deep: #5d8a1f;
+  --rl-teal: #0f2a26;
+  --rl-alert: #a52a20;
+  --rl-mono: 'JetBrains Mono', 'Cascadia Mono', 'Consolas', 'SFMono-Regular', ui-monospace, monospace;
+
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  padding: 30px 20px 40px;
+  background: var(--rl-paper);
+  color: var(--rl-ink);
+  font-family: var(--rl-mono);
+  overflow: hidden;
+}
+
+/* 背景网格 */
+.rhine__grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--rl-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rl-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+/* 顶部扫描光带 */
+.rhine__scan {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: -45%;
+  height: 45%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(141, 198, 63, 0.1) 55%,
+    rgba(141, 198, 63, 0.02) 85%,
+    transparent
+  );
+  animation: rhine-sweep 7.5s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rhine-sweep {
+  to {
+    transform: translateY(300%);
+  }
+}
+
+/* 顶栏 */
+.rhine__topbar {
+  position: relative;
+  z-index: 2;
+  width: min(1060px, 100%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rl-line);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.rhine__topbar-left,
+.rhine__topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rhine__topbar-mark {
+  width: 18px;
+  height: 18px;
+  color: var(--rl-green-deep);
+}
+
+.rhine__brand-name {
+  font-weight: 700;
+  letter-spacing: 0.22em;
+}
+
+.rhine__sep {
+  color: var(--rl-muted);
+  opacity: 0.6;
+}
+
+.rhine__muted {
+  color: var(--rl-muted);
+  letter-spacing: 0.1em;
+  text-transform: none;
+}
+
+.rhine__dot {
+  width: 6px;
+  height: 6px;
+  background: var(--rl-green);
+  box-shadow: 0 0 0 3px rgba(141, 198, 63, 0.22);
+  animation: rhine-blink 1.6s steps(2, end) infinite;
+}
+
+@keyframes rhine-blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+/* 主面板 */
+.rhine__panel {
+  position: relative;
+  z-index: 2;
+  width: min(1060px, 100%);
+  display: grid;
+  grid-template-columns: 0.86fr 1fr;
+  border: 1px solid var(--rl-ink);
+  background: var(--rl-white);
+  box-shadow: 14px 14px 0 rgba(16, 21, 15, 0.05);
+}
+
+/* 左：品牌 / 读数 */
+.rhine__ident {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 40px 34px;
+  background: var(--rl-teal);
+  color: #edf2e9;
+  overflow: hidden;
+}
+
+.rhine__ident::before {
+  content: '';
+  position: absolute;
+  right: -10%;
+  bottom: -30%;
+  width: 130%;
+  height: 62%;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(141, 198, 63, 0.14) 0 7px,
+    transparent 7px 19px
+  );
+  transform: rotate(-5deg);
+  pointer-events: none;
+}
+
+.rhine__mark {
+  width: 46px;
+  height: 46px;
+  color: var(--rl-green);
+}
+
+.rhine__wordmark {
+  position: relative;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: 0.1em;
+}
+
+.rhine__sub {
+  position: relative;
+  font-size: 10px;
+  line-height: 1.7;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(237, 242, 233, 0.55);
+}
+
+.rhine__readout {
+  position: relative;
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 7px 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(237, 242, 233, 0.16);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(237, 242, 233, 0.45);
+}
+
+.rhine__readout b {
+  font-weight: 400;
+  color: rgba(237, 242, 233, 0.92);
+  letter-spacing: 0.08em;
+}
+
+.rhine__barcode {
+  position: relative;
+  height: 26px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(237, 242, 233, 0.75) 0 2px,
+    transparent 2px 4px,
+    rgba(237, 242, 233, 0.75) 4px 5px,
+    transparent 5px 11px
+  );
+  opacity: 0.5;
+}
+
+/* 右：认证表单 */
+.rhine__auth {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 38px 36px 26px;
+}
+
+.rhine__auth::before,
+.rhine__auth::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--rl-green);
+}
+
+.rhine__auth::before {
+  top: 12px;
+  left: 12px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.rhine__auth::after {
+  right: 12px;
+  bottom: 12px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.rhine__eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--rl-green-deep);
+}
+
+.rhine__title {
+  margin-top: 6px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.rhine__hint {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  color: var(--rl-muted);
+}
+
+.rhine__form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rhine__field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.rhine__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rl-muted);
+}
+
+.rhine__idx {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 1px 5px;
+  border: 1px solid var(--rl-line);
+  color: var(--rl-ink);
+  letter-spacing: 0.06em;
+}
+
+.rhine__input {
+  width: 100%;
+  padding: 9px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--rl-ink);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--rl-mono);
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  color: var(--rl-ink);
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.rhine__input::placeholder {
+  color: rgba(16, 21, 15, 0.28);
+  letter-spacing: 0.08em;
+}
+
+.rhine__input:focus {
+  border-bottom-color: var(--rl-green);
+  box-shadow: 0 1px 0 0 var(--rl-green);
+}
+
+.rhine__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(165, 42, 32, 0.35);
+  background: rgba(165, 42, 32, 0.05);
+  color: var(--rl-alert);
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+
+.rhine__alert-tag {
+  flex: none;
+  padding: 0 5px;
+  border: 1px solid currentColor;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+.rhine__submit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid var(--rl-ink);
+  border-radius: 0;
+  background: var(--rl-ink);
+  color: var(--rl-white);
+  font-family: var(--rl-mono);
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.rhine__submit:hover:not(:disabled) {
+  background: var(--rl-green);
+  border-color: var(--rl-green);
+  color: var(--rl-ink);
+}
+
+.rhine__submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.rhine__submit:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.rhine__submit-en {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  opacity: 0.65;
+}
+
+.rhine__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.rhine__link {
+  color: var(--rl-ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rl-green);
+  padding-bottom: 1px;
+  letter-spacing: 0.06em;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.rhine__link:hover {
+  color: var(--rl-green-deep);
+  border-bottom-color: var(--rl-ink);
+}
+
+.rhine__sys {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--rl-line);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rl-muted);
+}
+
+.rhine__bar {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  background: rgba(16, 21, 15, 0.1);
+  overflow: hidden;
+}
+
+.rhine__bar i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 34%;
+  background: var(--rl-green);
+  animation: rhine-load 3.6s ease-in-out infinite;
+}
+
+@keyframes rhine-load {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+/* 响应式 */
+@media (max-width: 860px) {
+  .rhine__panel {
+    grid-template-columns: 1fr;
+  }
+
+  .rhine__ident {
+    padding: 28px 24px;
+    gap: 16px;
+  }
+
+  .rhine__wordmark {
+    font-size: 30px;
+  }
+
+  .rhine__auth {
+    padding: 30px 22px 22px;
+  }
+
+  .rhine__title {
+    font-size: 24px;
+  }
+}
+
+/* 尊重系统的减少动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .rhine__scan,
+  .rhine__dot,
+  .rhine__bar i {
+    animation: none;
+  }
+}
