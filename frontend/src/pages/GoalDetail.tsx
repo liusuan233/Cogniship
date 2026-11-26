@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getGoalPrompt } from '../api/learning';
 import type { GoalStatus, LearningNode } from '../api/types';
 import AssessmentList from '../components/AssessmentList';
+import RollingNumber from '../components/RollingNumber';
 import {
   useAssessments,
   useCreateAssessment,
@@ -68,14 +69,14 @@ export default function GoalDetail() {
   );
 
   if (isLoading) {
-    return <div className="text-sm text-gray-500">加载中…</div>;
+    return <div className="ambient-wait text-sm text-gray-500">加载中…</div>;
   }
 
   if (!goal) {
     return (
       <div className="space-y-2">
         <p className="text-sm text-red-500">目标不存在，或者它属于其他账号。</p>
-        <Link to="/" className="text-blue-600 hover:underline">
+        <Link to="/" className="hover-underline text-blue-600">
           返回工作台
         </Link>
       </div>
@@ -206,20 +207,21 @@ export default function GoalDetail() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="stagger space-y-6">
       <div className="text-sm">
-        <Link to="/" className="text-blue-600 hover:underline">
+        <Link to="/" className="hover-underline text-blue-600">
           ← 返回工作台
         </Link>
       </div>
 
       {/* 目标头部 */}
-      <section className="rounded-lg border bg-white p-4">
+      <section className="card-sweep rounded-lg border bg-white p-4">
         <div className="flex items-start gap-4">
           <div className="flex-1">
             <h1 className="text-2xl font-bold">{goal.title}</h1>
             <div className="mt-1 text-sm text-gray-500">
-              创建于 {formatDate(goal.created_at)} · 节点 {doneCount}/{nodes.length} 完成
+              创建于 {formatDate(goal.created_at)} · 节点 <RollingNumber value={doneCount} />/
+              <RollingNumber value={nodes.length} /> 完成
             </div>
             {goal.description && (
               <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">{goal.description}</p>
@@ -237,7 +239,7 @@ export default function GoalDetail() {
                 </option>
               ))}
             </select>
-            <button type="button" onClick={handleDeleteGoal} className="text-red-500 hover:underline">
+            <button type="button" onClick={handleDeleteGoal} className="hover-underline text-red-500">
               删除目标
             </button>
           </div>
@@ -246,7 +248,7 @@ export default function GoalDetail() {
       </section>
 
       {/* AI 拆解 */}
-      <section className="rounded-lg border bg-white p-4">
+      <section className="card-sweep rounded-lg border bg-white p-4">
         <h2 className="font-semibold">用 AI 拆解目标</h2>
         <ol className="mt-1 list-inside list-decimal text-sm text-gray-600">
           <li>点「复制 AI 提示词」，把提示词粘贴给任意 AI（ChatGPT / DeepSeek 等）</li>
@@ -259,7 +261,7 @@ export default function GoalDetail() {
             type="button"
             onClick={handleCopyPrompt}
             disabled={promptStatus === 'loading'}
-            className="rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50 disabled:opacity-60"
+            className="hover-btn rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50 disabled:opacity-60"
           >
             {promptStatus === 'loading' ? '获取中…' : '复制 AI 提示词'}
           </button>
@@ -288,7 +290,7 @@ export default function GoalDetail() {
               type="button"
               onClick={handleParse}
               disabled={parseNodesMutation.isPending}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
+              className="hover-btn rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
             >
               {parseNodesMutation.isPending ? '解析中…' : '解析并生成节点'}
             </button>
@@ -310,7 +312,9 @@ export default function GoalDetail() {
 
       {/* 节点列表 */}
       <section className="space-y-3">
-        <h2 className="font-semibold">学习节点（{nodes.length}）</h2>
+        <h2 className="font-semibold">
+          学习节点（<RollingNumber value={nodes.length} />）
+        </h2>
         {nodeError && <div className="text-sm text-red-500">{nodeError}</div>}
         {nodes.length === 0 && (
           <div className="rounded-lg border border-dashed p-6 text-center text-sm text-gray-500">
@@ -318,9 +322,9 @@ export default function GoalDetail() {
           </div>
         )}
 
-        <ul className="space-y-2">
+        <ul className="stagger space-y-2">
           {nodes.map((node, index) => (
-            <li key={node.id} className="rounded-lg border bg-white p-3">
+            <li key={node.id} className="hover-lift card-sweep rounded-lg border bg-white p-3">
               {editingNodeId === node.id ? (
                 <div className="space-y-2">
                   <input
@@ -340,7 +344,7 @@ export default function GoalDetail() {
                       type="button"
                       onClick={() => handleSaveNode(node.id)}
                       disabled={updateNode.isPending}
-                      className="rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
+                      className="hover-btn rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
                     >
                       {updateNode.isPending ? '保存中…' : '保存'}
                     </button>
@@ -370,8 +374,8 @@ export default function GoalDetail() {
                       onClick={() => handleToggleNode(node)}
                       className={
                         node.status === 'done'
-                          ? 'text-green-600 hover:underline'
-                          : 'text-gray-600 hover:underline'
+                          ? 'hover-underline text-green-600'
+                          : 'hover-underline text-gray-600'
                       }
                       title="点击切换状态：未开始 → 进行中 → 已完成"
                     >
@@ -380,14 +384,14 @@ export default function GoalDetail() {
                     <button
                       type="button"
                       onClick={() => startEditNode(node)}
-                      className="text-gray-600 hover:underline"
+                      className="hover-underline text-gray-600"
                     >
                       编辑
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteNode(node)}
-                      className="text-red-500 hover:underline"
+                      className="hover-underline text-red-500"
                     >
                       删除
                     </button>
@@ -433,7 +437,7 @@ export default function GoalDetail() {
             <button
               type="submit"
               disabled={createAssessment.isPending}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
+              className="hover-btn rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
             >
               {createAssessment.isPending ? '添加中…' : '添加考核'}
             </button>

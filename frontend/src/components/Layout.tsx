@@ -1,10 +1,17 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
+import RhineMark from './RhineMark';
+import AmbientBackground from './AmbientBackground';
 import '../styles/motion.css';
+import '../styles/app-skin.css';
 
-const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  isActive ? 'font-semibold text-blue-600' : 'text-gray-600 hover:text-blue-600';
+// 顶栏导航：编号 + 中文，激活项由 aria-current="page" 驱动那条信号绿底线
+const navItems = [
+  { to: '/', idx: '01', label: '工作台', end: true },
+  { to: '/logs', idx: '02', label: '学习记录', end: false },
+  { to: '/assessments', idx: '03', label: '自我考核', end: false },
+];
 
 export default function Layout() {
   const username = useAuthStore((state) => state.username);
@@ -21,31 +28,35 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="flex items-center gap-6 border-b bg-white px-6 py-3">
-        <Link to="/" className="text-lg font-bold">
-          识舟 Cogniship
+    <div className="app-shell min-h-screen">
+      <AmbientBackground />
+      <header className="app-header">
+        <Link to="/" className="app-brand hover-brand">
+          <RhineMark className="app-shell__mark" animated />
+          识舟
+          <small>COGNISHIP</small>
         </Link>
-        <nav className="flex gap-4 text-sm">
-          <NavLink to="/" end className={navLinkClass}>
-            工作台
-          </NavLink>
-          <NavLink to="/logs" className={navLinkClass}>
-            学习记录
-          </NavLink>
-          <NavLink to="/assessments" className={navLinkClass}>
-            自我考核
-          </NavLink>
+
+        <nav className="app-nav">
+          {navItems.map((item) => (
+            <NavLink key={item.to} to={item.to} end={item.end} data-idx={item.idx}>
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
-        <div className="ml-auto flex items-center gap-3 text-sm text-gray-500">
-          <span>{username ?? '已登录'}</span>
-          <button type="button" onClick={handleLogout} className="text-red-500 hover:underline">
-            退出登录
+
+        <div className="app-id">
+          <span className="app-id__dot" aria-hidden="true" />
+          <span>
+            OPERATOR <b>{username ?? '—'}</b>
+          </span>
+          <button type="button" onClick={handleLogout} className="btn btn--ghost">
+            退出
           </button>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-4xl px-6 py-6">
+      <main className="mx-auto w-full max-w-5xl px-6 py-8">
         {/* key 变化才重放动画：换页时淡入，同页内刷新状态不闪 */}
         <div key={location.pathname} className="page-enter">
           <Outlet />

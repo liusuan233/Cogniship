@@ -1,1 +1,47 @@
 @import "tailwindcss";
+
+/* ============================================================
+   交互：只有"装饰"不可选中
+   正文（目标、记录、笔记、报错文案）保持可选中、可复制；
+   环境背景、顶栏、登录页那套仪表读数与条码属于"界面本身"，不参与选择。
+   ============================================================ */
+
+/* 1. 环境背景层：点阵 / 光团 / 拓扑 / 罗盘，本来也不吃指针 */
+.app-bg,
+.app-bg * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 2. 应用顶栏：品牌、导航、账号、退出 */
+.app-shell > header,
+.app-shell > header * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 3. 登录页的仪器面板：顶栏读数、条码、编号、页脚行 */
+.rhine__grid,
+.rhine__scan,
+.rhine__topbar,
+.rhine__topbar *,
+.rhine__eyebrow,
+.rhine__idx,
+.rhine__readout,
+.rhine__sys,
+.rhine__wordmark,
+.rhine__foot {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 4. 按钮上的字（点击对象，不是可复制内容） */
+button {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 图片不参与拖拽 */
+img {
+  -webkit-user-drag: none;
+}

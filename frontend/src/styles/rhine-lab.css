@@ -37,7 +37,7 @@
     linear-gradient(to right, var(--rl-line) 1px, transparent 1px),
     linear-gradient(to bottom, var(--rl-line) 1px, transparent 1px);
   background-size: 56px 56px;
-  opacity: 0.32;
+  opacity: 0.2;
   pointer-events: none;
 }
 
@@ -753,12 +753,220 @@
   transform: translateX(2px);
 }
 
+/* ============================================================
+   标记悬停：一次「自检」
+   指针落在六边形上，视为对该终端的一次点检——
+   四角括弧由外落位 → 扫描线自上而下过一遍 → 虚线环寻标（dashoffset 流动）
+   → 内芯描边锁准 → 中心点亮起；同时左侧读数由灰转绿、条码提亮。
+   全部沿用短时缓动，无弹跳；移开即复位。
+   ============================================================ */
+
+.rhine__mark-box {
+  position: relative;
+  display: inline-flex;
+  width: 46px;
+  height: 46px;
+  color: var(--rl-green);
+  cursor: crosshair;
+}
+
+/* 四角括弧：悬停时由外向内落位，离开时退回原处 */
+.rhine__mark-box::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.09);
+  transition: opacity 0.18s ease, transform 0.24s cubic-bezier(0.2, 0.7, 0.3, 1);
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor);
+  background-size:
+    9px 1px, 1px 9px,
+    9px 1px, 1px 9px,
+    9px 1px, 1px 9px,
+    9px 1px, 1px 9px;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+}
+
+/* 扫描线：悬停瞬间自上而下过一遍，不循环 */
+.rhine__mark-box::before {
+  content: '';
+  position: absolute;
+  inset-inline: -2px;
+  top: 0;
+  height: 1px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--rl-green), transparent);
+}
+
+@keyframes rhine-mark-scan {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  12% {
+    opacity: 0.9;
+  }
+  86% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(46px);
+  }
+}
+
+.rhine__mark-box:hover::after,
+.rhine__mark-box:focus-within::after {
+  opacity: 0.8;
+  transform: scale(1);
+}
+
+.rhine__mark-box:hover::before,
+.rhine__mark-box:focus-within::before {
+  animation: rhine-mark-scan 0.66s cubic-bezier(0.3, 0, 0.2, 1) 0.04s 1;
+}
+
+/* 标记本体：整体微放 + 信号绿光晕（只亮一层，不发光污染周围） */
+.rhine__mark-box .rhine__mark {
+  transform-origin: center;
+  transition: transform 0.24s cubic-bezier(0.2, 0.7, 0.3, 1), filter 0.22s ease;
+}
+
+.rhine__mark-box:hover .rhine__mark,
+.rhine__mark-box:focus-within .rhine__mark {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 5px rgba(141, 198, 63, 0.6));
+}
+
+/* 描边与外环：外框加粗落定，虚线环 dashoffset 流动 = 寻标 */
+.rhine__mark-draw,
+.rhine__mark-rot,
+.rhine__mark-core,
+.rhine__mark-tick {
+  transition:
+    stroke-width 0.2s ease,
+    stroke-opacity 0.2s ease,
+    stroke-dashoffset 0.55s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.rhine__mark-box:hover .rhine__mark-draw,
+.rhine__mark-box:focus-within .rhine__mark-draw {
+  stroke-width: 2.1;
+}
+
+.rhine__mark-box:hover .rhine__mark-core,
+.rhine__mark-box:focus-within .rhine__mark-core {
+  stroke-opacity: 1;
+  stroke-width: 1.6;
+}
+
+.rhine__mark-box:hover .rhine__mark-tick,
+.rhine__mark-box:focus-within .rhine__mark-tick {
+  stroke-opacity: 1;
+}
+
+.rhine__mark-box:hover .rhine__mark-rot,
+.rhine__mark-box:focus-within .rhine__mark-rot {
+  stroke-opacity: 0.95;
+  stroke-dashoffset: -14;
+}
+
+/* 中心点：由呼吸绿转亮绿，一格 */
+.rhine__mark-box .rhine__mark-dot {
+  transition: fill 0.2s ease;
+}
+
+.rhine__mark-box:hover .rhine__mark-dot,
+.rhine__mark-box:focus-within .rhine__mark-dot {
+  fill: #d9f0ae;
+}
+
+/* 顺带联动：标记被点检时，左栏读数转绿、条码提亮（HUD 响应） */
+.rhine__ident:has(.rhine__mark-box:hover) .rhine__readout b {
+  color: var(--rl-green);
+}
+
+.rhine__ident:has(.rhine__mark-box:hover) .rhine__readout {
+  color: rgba(237, 242, 233, 0.62);
+}
+
+.rhine__ident:has(.rhine__mark-box:hover) .rhine__barcode {
+  opacity: 0.85;
+}
+
+.rhine__readout,
+.rhine__readout b,
+.rhine__barcode {
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
 /* 减少动效：一次性关掉本页所有动画与过渡 */
 @media (prefers-reduced-motion: reduce) {
-  .rhine *,
-  .rhine *::before,
-  .rhine *::after {
+  html:not([data-motion='full']) .rhine *,
+  html:not([data-motion='full']) .rhine *::before,
+  html:not([data-motion='full']) .rhine *::after {
     animation: none !important;
     transition-duration: 1ms !important;
+  }
+
+  /* 悬停自检的位移与扫描一并退化为静态：只保留描边与读数的颜色变化 */
+  html:not([data-motion='full']) .rhine__mark-box:hover .rhine__mark,
+  html:not([data-motion='full']) .rhine__mark-box:focus-within .rhine__mark {
+    transform: none;
+    filter: none;
+  }
+
+  html:not([data-motion='full']) .rhine__mark-box:hover::after,
+  html:not([data-motion='full']) .rhine__mark-box:focus-within::after {
+    transform: none;
+  }
+
+  html:not([data-motion='full']) .rhine__mark-box:hover::before,
+  html:not([data-motion='full']) .rhine__mark-box:focus-within::before {
+    opacity: 0;
+  }
+
+  /* 唯一保留：底纹 48s 漂移 + 虚线环 26s 旋转——周期极长、只有“活着”的感觉 */
+  html:not([data-motion='full']) .rhine .rhine__grid {
+    animation: rhine-grid-drift 48s linear infinite !important;
+  }
+
+  html:not([data-motion='full']) .rhine .rhine__mark-rot {
+    animation: rhine-spin 26s linear infinite !important;
+  }
+}
+
+/* ============================================================
+   登记页：比登录页多一组字段
+   高视口下与登录页一致（整体居中）；矮视口下改为顶部对齐 + 可滚动，
+   避免 flex 居中把上方内容裁掉。
+   ============================================================ */
+.rhine--tall {
+  overflow-y: auto;
+}
+
+@media (max-height: 880px) {
+  .rhine--tall {
+    justify-content: flex-start;
+    padding-top: 28px;
+  }
+
+  .rhine--tall .rhine__panel {
+    margin-bottom: 32px;
   }
 }

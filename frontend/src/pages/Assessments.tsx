@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import AssessmentList from '../components/AssessmentList';
+import RollingNumber from '../components/RollingNumber';
 import { useAssessments, useCreateAssessment, useGoals } from '../hooks/useLearning';
 import { apiErrorMessage, todayISO } from '../utils/format';
 
@@ -77,7 +78,7 @@ export default function Assessments() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="stagger space-y-6">
       <section>
         <h1 className="text-2xl font-bold">自我考核</h1>
         <p className="mt-1 text-sm text-gray-600">学完一段就自测一次，把得分和反思留下来。</p>
@@ -86,13 +87,13 @@ export default function Assessments() {
       {goals.length === 0 ? (
         <div className="rounded-lg border border-dashed p-6 text-center text-sm text-gray-500">
           考核要挂在学习目标下，先去{' '}
-          <Link to="/" className="text-blue-600 hover:underline">
+          <Link to="/" className="hover-underline text-blue-600">
             工作台
           </Link>{' '}
           建一个目标吧。
         </div>
       ) : (
-        <section className="rounded-lg border bg-white p-4">
+        <section className="card-sweep rounded-lg border bg-white p-4">
           <h2 className="mb-3 font-semibold">新建考核</h2>
           {formError && <div className="mb-2 text-sm text-red-500">{formError}</div>}
           <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
@@ -141,7 +142,7 @@ export default function Assessments() {
             <button
               type="submit"
               disabled={createAssessment.isPending}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
+              className="hover-btn rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
             >
               {createAssessment.isPending ? '添加中…' : '添加考核'}
             </button>
@@ -162,12 +163,12 @@ export default function Assessments() {
                   : 'rounded-md border px-3 py-1 text-gray-600'
               }
             >
-              {FILTER_LABEL[item]}（{counts[item]}）
+              {FILTER_LABEL[item]}（<RollingNumber value={counts[item]} />）
             </button>
           ))}
         </div>
 
-        {isLoading && <div className="text-sm text-gray-500">加载中…</div>}
+        {isLoading && <div className="ambient-wait text-sm text-gray-500">加载中…</div>}
         {error && <div className="text-sm text-red-500">{apiErrorMessage(error, '加载考核失败')}</div>}
 
         {!isLoading && !error && (

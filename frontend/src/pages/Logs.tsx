@@ -91,22 +91,22 @@ export default function Logs() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="stagger space-y-6">
       <section>
         <h1 className="text-2xl font-bold">学习记录</h1>
         <p className="mt-1 text-sm text-gray-600">按天记录学习时长和心得，日拱一卒。</p>
       </section>
 
       <section className="grid grid-cols-3 gap-3">
-        <div className="rounded-lg border bg-white p-3">
+        <div className="hover-lift rounded-lg border bg-white p-3">
           <div className="text-xs text-gray-500">累计学习</div>
           <div className="text-xl font-semibold">{formatMinutes(stats.totalMinutes)}</div>
         </div>
-        <div className="rounded-lg border bg-white p-3">
+        <div className="hover-lift rounded-lg border bg-white p-3">
           <div className="text-xs text-gray-500">近 7 天</div>
           <div className="text-xl font-semibold">{formatMinutes(stats.weekMinutes)}</div>
         </div>
-        <div className="rounded-lg border bg-white p-3">
+        <div className="hover-lift rounded-lg border bg-white p-3">
           <div className="text-xs text-gray-500">记录条数</div>
           <div className="text-xl font-semibold">{stats.count}</div>
         </div>
@@ -171,7 +171,7 @@ export default function Logs() {
           <button
             type="submit"
             disabled={createLog.isPending}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
+            className="hover-btn rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
           >
             {createLog.isPending ? '保存中…' : '保存记录'}
           </button>
@@ -181,7 +181,7 @@ export default function Logs() {
       <section className="space-y-3">
         <h2 className="font-semibold">历史记录</h2>
         {actionError && <div className="text-sm text-red-500">{actionError}</div>}
-        {isLoading && <div className="text-sm text-gray-500">加载中…</div>}
+        {isLoading && <div className="ambient-wait text-sm text-gray-500">加载中…</div>}
         {error && <div className="text-sm text-red-500">{apiErrorMessage(error, '加载学习记录失败')}</div>}
         {!isLoading && !error && logs.length === 0 && (
           <div className="rounded-lg border border-dashed p-6 text-center text-sm text-gray-500">
@@ -189,9 +189,9 @@ export default function Logs() {
           </div>
         )}
 
-        <ul className="space-y-2">
+        <ul className="stagger space-y-2">
           {logs.map((log) => (
-            <li key={log.id} className="rounded-lg border bg-white p-3">
+            <li key={log.id} className="hover-lift card-sweep rounded-lg border bg-white p-3">
               <div className="flex items-start gap-3">
                 <div className="flex-1">
                   <div className="font-medium">
@@ -210,7 +210,7 @@ export default function Logs() {
                 <button
                   type="button"
                   onClick={() => handleDelete(log)}
-                  className="text-sm text-red-500 hover:underline"
+                  className="hover-underline text-sm text-red-500"
                 >
                   删除
                 </button>

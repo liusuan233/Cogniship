@@ -81,9 +81,9 @@ export default function AssessmentList({
     <div className="space-y-2">
       {formError && <div className="text-sm text-red-500">{formError}</div>}
 
-      <ul className="space-y-2">
+      <ul className="stagger space-y-2">
         {assessments.map((assessment) => (
-          <li key={assessment.id} className="rounded-lg border bg-white p-3">
+          <li key={assessment.id} className="hover-lift card-sweep rounded-lg border bg-white p-3">
             <div className="flex items-start gap-3">
               <div className="flex-1">
                 <div className="font-medium">
@@ -114,19 +114,19 @@ export default function AssessmentList({
 
               <div className="flex flex-col items-end gap-1 text-sm">
                 {assessment.is_completed ? (
-                  <button type="button" onClick={() => reopen(assessment)} className="text-gray-600 hover:underline">
+                  <button type="button" onClick={() => reopen(assessment)} className="hover-underline text-gray-600">
                     重新打开
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={() => startComplete(assessment)}
-                    className="text-blue-600 hover:underline"
+                    className="hover-underline text-blue-600"
                   >
                     填写结果
                   </button>
                 )}
-                <button type="button" onClick={() => handleDelete(assessment)} className="text-red-500 hover:underline">
+                <button type="button" onClick={() => handleDelete(assessment)} className="hover-underline text-red-500">
                   删除
                 </button>
               </div>
@@ -160,7 +160,7 @@ export default function AssessmentList({
                     type="button"
                     onClick={() => submitComplete(assessment)}
                     disabled={updateAssessment.isPending}
-                    className="rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
+                    className="hover-btn rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
                   >
                     {updateAssessment.isPending ? '保存中…' : '保存结果'}
                   </button>

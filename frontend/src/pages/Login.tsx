@@ -6,6 +6,7 @@ import { obtainToken } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
 import { apiErrorMessage } from '../utils/format';
 import RhineMark from '../components/RhineMark';
+import AmbientBackground from '../components/AmbientBackground';
 import '../styles/rhine-lab.css';
 
 export default function Login() {
@@ -63,6 +64,7 @@ export default function Login() {
 
   return (
     <div className="rhine">
+      <AmbientBackground variant="paper" />
       <div className="rhine__grid" aria-hidden="true" />
       <div className="rhine__scan" aria-hidden="true" />
 
@@ -84,7 +86,10 @@ export default function Login() {
 
       <main className="rhine__panel">
         <section className="rhine__ident">
-          <RhineMark className="rhine__mark" animated />
+          {/* 悬停时标记自检：括弧定位、扫描线过一遍、虚线环寻标、读数联动 */}
+          <div className="rhine__mark-box">
+            <RhineMark className="rhine__mark" animated />
+          </div>
           <div className="rhine__wordmark">
             RHINE
             <br />

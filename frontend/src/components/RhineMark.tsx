@@ -28,14 +28,15 @@ export default function RhineMark({ className, animated = false }: RhineMarkProp
         strokeWidth="1.6"
       />
       <polygon
+        className="rhine__mark-core"
         points="24,12 36,18.9 36,32.1 24,39 12,32.1 12,18.9"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.1"
         opacity="0.5"
       />
-      <line x1="24" y1="2.5" x2="24" y2="12" stroke="currentColor" strokeWidth="1.1" opacity="0.7" />
-      <line x1="24" y1="39" x2="24" y2="45.5" stroke="currentColor" strokeWidth="1.1" opacity="0.7" />
+      <line className="rhine__mark-tick" x1="24" y1="2.5" x2="24" y2="12" stroke="currentColor" strokeWidth="1.1" opacity="0.7" />
+      <line className="rhine__mark-tick" x1="24" y1="39" x2="24" y2="45.5" stroke="currentColor" strokeWidth="1.1" opacity="0.7" />
       <circle className={animated ? 'rhine__mark-dot' : undefined} cx="24" cy="24" r="2.6" fill="currentColor" />
     </svg>
   );
